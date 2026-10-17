@@ -97,9 +97,16 @@ aside.report h2{font-size:18px}
 .counts{display:flex;gap:6px;font-family:var(--f-mono);font-size:12px}
 .counts span{padding:2px 6px;border-radius:3px}
 .c-n{background:var(--ok-bg);color:var(--ok)} .c-a{background:var(--bad-bg);color:var(--bad)} .c-o{background:var(--sunk);color:var(--muted)}
-pre.rep{margin:0;padding:14px 16px;font-family:var(--f-mono);font-size:12.5px;line-height:1.6;white-space:pre-wrap;word-wrap:break-word;overflow:auto;flex:1;min-height:200px}
+textarea.rep{display:block;width:100%;margin:0;padding:14px 16px;border:0;background:transparent;color:var(--fg);font-family:var(--f-mono);font-size:12.5px;line-height:1.6;white-space:pre-wrap;overflow:auto;flex:1;min-height:320px;resize:vertical}
+textarea.rep:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.manual{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 16px;background:var(--warn-bg);color:var(--warn);font-size:12.5px;font-weight:600}
+.manual button{font-size:12.5px;padding:3px 9px}
+.ed label{font-size:12px;font-weight:600;color:var(--fg)}
+.ed input.imp{width:100%;font-family:var(--f-mono);font-size:12.5px;padding:6px 10px;border:1px solid var(--line);border-radius:5px;background:var(--panel);color:var(--fg)}
 aside.report footer{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line);flex-wrap:wrap;align-items:center}
 .toast{font-size:13px;color:var(--ok)}
+.openmsg{flex-basis:100%;font-size:12.5px;color:var(--ok)}
+.openmsg[data-open="1"]{color:var(--warn);font-weight:600}
 .opts{display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--line);align-items:center;font-size:12.5px;color:var(--muted)}
 .opts .seg button{padding:4px 9px;font-size:12.5px}
 .opts .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
@@ -107,6 +114,13 @@ aside.report footer{display:flex;gap:8px;padding:12px 16px;border-top:1px solid 
 .keys{font-size:12.5px;color:var(--muted)}
 kbd{font-family:var(--f-mono);font-size:11.5px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--panel);color:var(--fg)}
 .item.cur{outline:2px solid var(--accent);outline-offset:-2px}
+.ed{grid-column:1/-1;display:flex;flex-direction:column;gap:6px}
+.ed textarea{width:100%;min-height:64px;resize:vertical;font-family:var(--f-mono);font-size:12.5px;line-height:1.5;padding:8px 10px;border:1px solid var(--line);border-radius:5px;background:var(--panel);color:var(--fg)}
+.ed .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted)}
+.ed .row button{font-size:12.5px;padding:4px 10px}
+.mine{font-size:13px;color:var(--muted)}
+.mine summary{cursor:pointer;font-weight:600;color:var(--fg)}
+.mine textarea{width:100%;min-height:90px;font-family:var(--f-mono);font-size:12px;padding:8px;border:1px solid var(--line);border-radius:5px;background:var(--panel);color:var(--fg);margin-top:8px}
 .note{font-size:12.5px;color:var(--muted);max-width:75ch;margin-top:8px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 .credits{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 28px;font-size:13px;color:var(--muted)}
@@ -142,6 +156,7 @@ kbd{font-family:var(--f-mono);font-size:11.5px;border:1px solid var(--line);bord
           <button class="btn ghost" id="allnorm">Mark remaining normal</button>
         </div>
         <div id="pane-read" style="display:flex;flex-direction:column;gap:20px"></div>
+        <div id="mine"></div>
       </div>
       <div id="pane-grade" hidden></div>
       <p class="note">Educational and reporting aid. Criteria are summarised from AAST OIS 2018, revised Atlanta 2012 and the modified CT severity index; check them against the source papers before relying on this. Not for diagnosis.</p>
@@ -158,11 +173,13 @@ kbd{font-family:var(--f-mono);font-size:11.5px;border:1px solid var(--line);bord
         <span>Spelling</span>
         <div class="seg" role="group" aria-label="Spelling"><button id="sp-uk" aria-pressed="true">UK</button><button id="sp-us" aria-pressed="false">US</button></div>
       </div>
-      <pre class="rep" id="rep"></pre>
+      <div class="manual" id="manual" hidden><span>Edited by hand. Checklist changes won't update the report.</span><button class="btn ghost" id="rebuild">Rebuild from checklist</button></div>
+      <textarea class="rep" id="rep" aria-label="Report draft (editable)" spellcheck="true"></textarea>
       <footer>
         <button class="btn" id="copy">Copy text</button>
         <button class="btn ghost" id="reset">Clear marks</button>
         <span class="toast" id="toast" aria-live="polite"></span>
+        <span class="openmsg" id="openmsg" aria-live="polite"></span>
       </footer>
     </aside>
   </div>
@@ -170,18 +187,18 @@ kbd{font-family:var(--f-mono);font-size:11.5px;border:1px solid var(--line);bord
     <div>
       <div class="label">Author</div>
       <div><b id="cr-name">Dr Ashraf Nadaf</b>, MD, DNB, EDiR, FRCR<br>Specialist Radiologist, Abu Dhabi, UAE<br>ORCID <a href="https://orcid.org/0000-0003-1838-325X">0000-0003-1838-325X</a></div>
-      <div style="margin-top:8px">Version <span id="cr-ver">1.1</span> · <span id="cr-date">October 2026</span>. Clinical content and design by the author; built with AI assistance (Claude, Anthropic).</div>
+      <div style="margin-top:8px">Version <span id="cr-ver">1.3</span> · <span id="cr-date">October 2026</span>. Clinical content and design by the author; built with AI assistance (Claude, Anthropic).</div>
     </div>
     <div>
       <div class="label">How to cite</div>
-      <div class="cite" id="cr-cite">Nadaf A. ER Abdomen Companion: an indication-based reading checklist and reporting aid for emergency abdominal CT [web application]. Version 1.1. 2026. Available from: https://ashnad235.github.io/ER-Abdomen-Companion/</div><div style="margin-top:6px"><a href="https://github.com/ashnad235/ER-Abdomen-Companion">Source and citation file on GitHub</a></div>
+      <div class="cite" id="cr-cite">Nadaf A. ER Abdomen Companion: an indication-based reading checklist and reporting aid for emergency abdominal CT [web application]. Version 1.3. 2026. Available from: https://ashnad235.github.io/ER-Abdomen-Companion/</div><div style="margin-top:6px"><a href="https://github.com/ashnad235/ER-Abdomen-Companion">Source and citation file on GitHub</a></div>
     </div>
   </footer>
 </div>
 
 <script>
 // ---------- Credits (edit here) ----------
-const CREDITS = {name:"Ashraf Nadaf", citeName:"Nadaf A", version:"1.1", date:"October 2026", year:"2026", url:"https://ashnad235.github.io/ER-Abdomen-Companion/"};
+const CREDITS = {name:"Ashraf Nadaf", citeName:"Nadaf A", version:"1.3", date:"October 2026", year:"2026", url:"https://ashnad235.github.io/ER-Abdomen-Companion/"};
 document.getElementById("cr-name").textContent = "Dr " + CREDITS.name;
 document.getElementById("cr-ver").textContent = CREDITS.version;
 document.getElementById("cr-date").textContent = CREDITS.date;
@@ -335,6 +352,125 @@ const IND = {
       ["Ovarian vein thrombosis","Postpartum; tubular structure lateral to the ureter.","",""]]}
 };
 
+// ---------- Abnormal descriptions ----------
+// [a / b] = choose one, __ = fill in. Key "indication|Title" overrides a plain "Title".
+const ABN = {
+  "Lung bases":"[Consolidation / pleural effusion / pulmonary embolus] in the [right / left] lower lobe.",
+  "Free intraperitoneal gas":"Free intraperitoneal gas [anterior to the liver / around the duodenum / between bowel loops], in keeping with hollow viscus perforation.",
+  "Aorta and iliacs":"The infrarenal abdominal aorta is aneurysmal, measuring __ cm in maximal diameter[, with periaortic haematoma concerning for rupture].",
+  "Hernia orifices":"[Right / Left] [inguinal / femoral / umbilical / incisional] hernia containing [fat / a small bowel loop], [without / with] features of obstruction or strangulation.",
+  "Bones":"[Fracture / lytic lesion / sclerotic lesion] of the __.",
+  "Free fluid":"[Small / moderate / large] volume of [simple / high-attenuation] free fluid in the __.",
+
+  "Appendix":"Dilated appendix measuring __ mm with wall hyperenhancement and periappendiceal fat stranding[, and an appendicolith at its base], in keeping with acute appendicitis.",
+  "Appendiceal perforation":"Features of appendiceal perforation: [focal wall defect / extraluminal gas / extraluminal appendicolith / periappendiceal abscess measuring __ cm].",
+  "Gallbladder and biliary tree":"Distended gallbladder with wall thickening of __ mm and pericholecystic fat stranding[, and gallstones], in keeping with acute cholecystitis.",
+  "Pancreas":"Pancreatic enlargement with peripancreatic fat stranding[ and fluid], in keeping with acute pancreatitis.",
+  "Stomach and duodenum":"[Wall thickening / ulceration] of the [gastric antrum / duodenal bulb][, with adjacent extraluminal gas concerning for perforation].",
+  "Small bowel":"[Dilated small bowel loops up to __ cm with a transition point in the __ / Segmental wall thickening of the __ over __ cm with mural hyperenhancement].",
+  "Colon":"Segmental wall thickening of the __ colon with pericolic fat stranding[, and diverticula], in keeping with [colitis / diverticulitis].",
+  "Kidneys and ureters":"__ mm calculus in the [right / left] [proximal / mid / distal] ureter with [mild / moderate / severe] upstream hydroureteronephrosis, in keeping with obstructive uropathy.",
+  "Liver and spleen":"[Hypoattenuating lesion / abscess / infarct] measuring __ cm in [hepatic segment __ / the spleen].",
+  "Pelvic organs":"[Enlarged [right / left] ovary measuring __ cm / adnexal lesion measuring __ cm / uterine abnormality: __].",
+  "Mesenteric vessels":"[Filling defect / occlusion] of the [SMA / SMV / portal vein] at __.",
+  "Mesenteric ischaemia":"[SMA occlusion / reduced bowel wall enhancement / pneumatosis / portomesenteric venous gas] involving the __, in keeping with acute mesenteric ischaemia.",
+  "Leaking AAA / aortic dissection":"[Abdominal aortic aneurysm measuring __ cm with retroperitoneal haematoma, in keeping with rupture / Aortic dissection with an intimal flap extending from __ to __].",
+  "Closed-loop obstruction / internal hernia":"U-shaped dilated small bowel loop in the __ with two adjacent transition points and mesenteric swirl, in keeping with closed-loop obstruction.",
+  "Rectus sheath haematoma":"[Right / Left] rectus sheath haematoma measuring __ × __ cm[, with active contrast extravasation].",
+  "Ectopic pregnancy / torsion":"[Haemoperitoneum with an adnexal mass, concerning for ruptured ectopic pregnancy / Enlarged [right / left] ovary with peripheral follicles and a twisted pedicle, concerning for ovarian torsion].",
+
+  "Terminal ileum and caecum":"[Wall thickening of the terminal ileum over __ cm / caecal wall thickening] with surrounding fat stranding, suggestive of [infective ileocolitis / Crohn disease / typhlitis].",
+  "Right adnexa":"[Right ovarian cyst measuring __ cm / right haemorrhagic ovarian cyst / right tubo-ovarian abscess measuring __ cm].",
+  "Right kidney and ureter":"__ mm calculus in the right [proximal / mid / distal] ureter with [mild / moderate / severe] hydroureteronephrosis.",
+  "Ovarian torsion":"Enlarged [right / left] ovary measuring __ cm with peripheral follicles[, a twisted vascular pedicle] and adjacent free fluid, concerning for ovarian torsion.",
+  "Caecal carcinoma":"Irregular caecal mass measuring __ cm[, with regional lymph nodes], suspicious for malignancy; colonoscopic correlation recommended.",
+  "Right-sided diverticulitis":"Inflamed diverticulum of the [caecum / ascending colon] with pericolic fat stranding, in keeping with right-sided diverticulitis. The appendix is normal.",
+  "Epiploic appendagitis / omental infarct":"Ovoid fat-attenuation lesion with a hyperattenuating rim adjacent to the __, in keeping with [epiploic appendagitis / omental infarction].",
+
+  "Sigmoid / descending colon":"Sigmoid diverticulosis with segmental wall thickening and pericolic fat stranding over __ cm, in keeping with acute diverticulitis.",
+  "Abscess":"Pericolic abscess measuring __ × __ cm adjacent to the __.",
+  "Extraluminal gas":"[Pericolic / distant] extraluminal gas, in keeping with [contained / free] perforation.",
+  "Fistula":"Gas within the [bladder / vagina] with a tract to the sigmoid colon, in keeping with a [colovesical / colovaginal] fistula.",
+  "Left adnexa / ureter":"[Left adnexal lesion measuring __ cm / __ mm left ureteric calculus with hydronephrosis].",
+  "Colorectal carcinoma":"Short-segment shouldered wall thickening of the __ colon over __ cm with adjacent lymph nodes, suspicious for malignancy; endoscopic correlation recommended.",
+  "Ischaemic colitis":"Wall thickening of the [splenic flexure / descending / sigmoid] colon in a watershed distribution, suggestive of ischaemic colitis.",
+  "Large bowel obstruction":"Dilated large bowel with the caecum measuring __ cm and a transition point at the __[, due to __].",
+
+  "Gallbladder":"Distended gallbladder with wall thickening of __ mm and pericholecystic fat stranding, in keeping with acute cholecystitis.",
+  "Gallstones":"Gallstones within the gallbladder[, the largest measuring __ mm].",
+  "Gangrenous / emphysematous change":"[Irregular or absent wall enhancement / intraluminal membranes / intramural or intraluminal gas], in keeping with [gangrenous / emphysematous] cholecystitis.",
+  "Biliary tree":"Dilated common bile duct measuring __ mm[, with a distal calculus], in keeping with choledocholithiasis.",
+  "Liver":"[Hepatic abscess measuring __ cm in segment __ / periportal oedema].",
+  "trauma|Liver":"Hepatic [laceration __ cm deep / subcapsular haematoma / intraparenchymal haematoma] in segment __. AAST (2018) grade __.",
+  "Right lower lobe pneumonia":"Consolidation in the right lower lobe, a possible extra-abdominal cause of the right upper quadrant pain.",
+  "Perforated duodenal ulcer":"Extraluminal gas and fluid adjacent to the duodenal bulb[, with a wall defect], in keeping with a perforated duodenal ulcer.",
+  "Right pyelonephritis":"Striated nephrogram of the right kidney with perinephric fat stranding, in keeping with acute pyelonephritis.",
+  "Gallbladder wall oedema mimics":"Gallbladder wall thickening without distension or pericholecystic inflammation, likely secondary to [hepatitis / heart failure / hypoalbuminaemia] rather than cholecystitis.",
+
+  "Collections and necrosis":"[Acute peripancreatic fluid collection / acute necrotic collection] measuring __ × __ cm in the __ (revised Atlanta).",
+  "Vascular complications":"[Splenic vein thrombosis / pseudoaneurysm of the __ artery measuring __ mm].",
+  "Perforated peptic ulcer":"Free intraperitoneal gas with [a wall defect in the __ / fluid around the duodenum], in keeping with a perforated peptic ulcer.",
+  "Aortic dissection / AAA":"[Aortic dissection with an intimal flap extending from __ to __ / Abdominal aortic aneurysm measuring __ cm].",
+  "Pancreatic mass":"Hypoattenuating mass in the pancreatic [head / body / tail] measuring __ cm[, with upstream duct dilatation], suspicious for malignancy.",
+
+  "Ureteric calculus":"__ × __ × __ mm calculus (__ HU) in the [right / left] [proximal ureter / mid ureter / distal ureter / vesicoureteric junction].",
+  "Hydronephrosis":"[Mild / moderate / severe] [right / left] hydroureteronephrosis with perinephric fat stranding.",
+  "Forniceal rupture":"Perinephric fluid around the [right / left] kidney, in keeping with forniceal rupture.",
+  "Renal parenchyma":"[Striated nephrogram / renal mass measuring __ cm / cortical scarring] in the [right / left] kidney.",
+  "Leaking AAA":"Abdominal aortic aneurysm measuring __ cm with [retroperitoneal haematoma / a crescent sign / a draped aorta], concerning for [rupture / impending rupture].",
+  "Obstructed infected kidney":"Obstructed [right / left] kidney; in the context of fever this raises concern for pyonephrosis requiring urgent decompression.",
+  "Phlebolith vs stone":"Pelvic calcification on the [right / left] showing a [soft-tissue rim sign, favouring a ureteric calculus / comet-tail sign, favouring a phlebolith].",
+  "Appendicitis / diverticulitis":"No urinary tract calculus. Findings are instead in keeping with [acute appendicitis / acute diverticulitis]: __.",
+
+  "SMA and coeliac axis":"[Embolic occlusion of the SMA __ cm beyond its origin / ostial thrombotic occlusion of the SMA on calcified plaque], in keeping with acute arterial mesenteric ischaemia.",
+  "SMV and portal vein":"Thrombus in the [SMV / portal vein] with mesenteric congestion, in keeping with mesenteric venous thrombosis.",
+  "Bowel wall enhancement":"[Reduced / absent] mural enhancement of the __ over __ cm, concerning for bowel ischaemia.",
+  "Pneumatosis / portomesenteric gas":"[Pneumatosis intestinalis of the __ / portomesenteric venous gas], concerning for transmural bowel ischaemia.",
+  "Mesentery":"Mesenteric fat stranding and fluid adjacent to the __.",
+  "Closed-loop obstruction":"U-shaped dilated small bowel loop in the __ with two adjacent transition points and mesenteric swirl, in keeping with closed-loop obstruction.",
+  "Aortic dissection into SMA":"Aortic dissection with the intimal flap extending into the SMA[, with reduced perfusion of the __].",
+  "NOMI":"Diffuse narrowing of the SMA branches without occlusion, suggestive of non-occlusive mesenteric ischaemia in the appropriate clinical setting.",
+  "Colonic ischaemia":"Wall thickening of the __ colon in a watershed distribution, suggestive of ischaemic colitis.",
+
+  "Transition point":"Dilated small bowel loops up to __ cm with a transition point in the __[, and the small bowel faeces sign proximal to it], in keeping with small bowel obstruction.",
+  "Cause":"The cause is [adhesions, with no mass or hernia at the transition point / a __ hernia / a mass / intussusception / gallstone ileus].",
+  "Closed-loop signs":"Features of closed-loop obstruction in the __: [U-shaped dilated loop / two adjacent transition points / whirl sign / radial mesenteric vessels].",
+  "Strangulation signs":"Features concerning for strangulation: [reduced wall enhancement / wall thickening / mesenteric haziness or fluid / ascites].",
+  "Large bowel":"Dilated large bowel with the caecum measuring __ cm[, in keeping with [sigmoid / caecal] volvulus / due to __].",
+  "Obturator / femoral hernia":"[Right / Left] [obturator / femoral] hernia containing a small bowel loop, causing obstruction.",
+  "Gallstone ileus":"Pneumobilia and an ectopic gallstone measuring __ mm in the __, in keeping with gallstone ileus.",
+  "Internal hernia":"Clustered small bowel loops in the __ with mesenteric swirl, suspicious for internal hernia.",
+
+  "Spleen":"Splenic [laceration __ cm deep / subcapsular haematoma / intraparenchymal haematoma]. AAST (2018) grade __.",
+  "Kidneys and collecting system":"[Right / Left] renal [laceration __ cm deep / perirenal haematoma][, with urinary extravasation on the delayed phase]. AAST (2018) grade __.",
+  "Active extravasation":"Active [arterial / venous] contrast extravasation from the __, enlarging on the delayed phase.",
+  "Bowel and mesentery":"[Focal bowel wall thickening / mesenteric haematoma / extraluminal gas] at the __, concerning for bowel or mesenteric injury.",
+  "Pancreas and duodenum":"[Pancreatic laceration at the __ / fluid between the pancreas and splenic vein / duodenal haematoma / retroperitoneal gas].",
+  "Diaphragm":"[Right / Left] hemidiaphragmatic rupture with [a collar sign / a dependent viscera sign] and herniation of the __.",
+  "Spine and pelvis":"[Fracture of the __ / pelvic ring disruption involving the __].",
+  "Bowel / mesenteric injury":"[Focal bowel wall thickening / mesenteric haematoma / unexplained free fluid] at the __, concerning for bowel or mesenteric injury.",
+  "Pancreatic duct injury":"Pancreatic laceration involving more than 50% of the gland thickness at the __, implying main pancreatic duct injury.",
+  "Adrenal haemorrhage":"[Right / Left] adrenal haematoma measuring __ cm.",
+  "Bladder injury":"[Intraperitoneal / extraperitoneal] bladder rupture with contrast extravasation on CT cystography.",
+
+  "Anastomosis":"Extraluminal [oral / rectal] contrast and gas adjacent to the __ anastomosis, in keeping with an anastomotic leak.",
+  "Collections":"Rim-enhancing collection measuring __ × __ cm in the __[, containing gas], suitable for percutaneous drainage.",
+  "Haematoma":"Haematoma measuring __ × __ cm in the __[, with active extravasation].",
+  "Wound and port sites":"[Wound collection / port-site hernia] at the __.",
+  "Retained surgical item":"[Radio-opaque marker / gossypiboma] in the __, in keeping with a retained surgical item.",
+  "Bile leak":"Fluid collection in the [gallbladder fossa / subhepatic space] measuring __ cm, suspicious for a bile leak.",
+  "Basal PE / pneumonia":"[Filling defect in a lower-lobe pulmonary artery, in keeping with pulmonary embolism / basal consolidation].",
+  "Colitis":"Diffuse colonic wall thickening[, with the accordion sign], in keeping with [Clostridioides difficile / infective] colitis.",
+
+  "β-hCG status":"β-hCG [positive / not known].",
+  "Ovaries":"[Right / Left] [haemorrhagic cyst measuring __ cm / enlarged ovary measuring __ cm].",
+  "Uterus":"[Degenerating fibroid / endometrial thickening with fluid / retained products of conception].",
+  "Haemoperitoneum":"[Small / moderate / large] haemoperitoneum[, with sentinel clot in the __].",
+  "Ruptured ectopic":"Haemoperitoneum with a [right / left] adnexal mass in a β-hCG-positive patient, concerning for ruptured ectopic pregnancy.",
+  "Tubo-ovarian abscess":"Multiloculated [right / left] adnexal collection measuring __ cm, in keeping with a tubo-ovarian abscess.",
+  "Ovarian vein thrombosis":"Thrombus in the [right / left] ovarian vein, in keeping with ovarian vein thrombosis."
+};
+
 // ---------- State ----------
 let cur = "pain";
 const marks = {};   // key -> "n" | "a"
@@ -345,8 +481,12 @@ const store = {
 };
 const saved = store.get(); if(saved){cur = saved.cur||cur; Object.assign(marks,saved.marks||{}); Object.assign(grades,saved.grades||{});}
 let opt = Object.assign({short:false, us:false}, (saved&&saved.opt)||{});
+const myPh = Object.assign({}, (saved&&saved.myPh)||{});   // radiologist's saved defaults
+const caseTx = Object.assign({}, (saved&&saved.caseTx)||{}); // edits for the current case
+const caseImp = Object.assign({}, (saved&&saved.caseImp)||{}); // impression edits for the current case
+let manual = false; // report edited by hand
 const hist = [];
-const save = ()=>store.set({cur,marks,grades,opt});
+const save = ()=>store.set({cur,marks,grades,opt,myPh,caseTx,caseImp});
 
 const $ = s=>document.querySelector(s);
 // Anonymous usage counts (GoatCounter on the public site; does nothing elsewhere)
@@ -364,6 +504,16 @@ $("#rail").addEventListener("click",e=>{
 });
 
 // ---------- Checklist ----------
+function itemOf(key){
+  if(key.startsWith("sw:")) return SWEEP[+key.slice(3)];
+  const [ind,rest]=key.split(":"); return (rest[0]==="i"?IND[ind].items:IND[ind].dm)[+rest.slice(1)];
+}
+function phKey(key,title){ const ind=key.startsWith("sw:")?"sw":key.split(":")[0]; return ABN[ind+"|"+title]!==undefined ? ind+"|"+title : title; }
+function defaultAbn(key,title){ const k=phKey(key,title); return myPh[k] ?? ABN[k] ?? `[Describe — ${title}]`; }
+function abnText(key,title){ return caseTx[key] ?? defaultAbn(key,title); }
+const cap1=t=>t.charAt(0).toUpperCase()+t.slice(1);
+function deriveImp(text){ const m=text.match(/(?:in keeping with|concerning for|suspicious for|suggestive of)\s+([^.;]+)/i); return m?cap1(m[1].trim())+".":""; }
+function impText(key,title){ if(caseImp[key]!==undefined) return caseImp[key]; const k=phKey(key,title)+"#imp"; return myPh[k] ?? deriveImp(abnText(key,title)); }
 function itemHTML(key,it){
   const s=marks[key]||"";
   return `<div class="item" data-key="${key}" data-s="${s}">
@@ -371,7 +521,9 @@ function itemHTML(key,it){
     <div class="seg" role="group" aria-label="${esc(it[0])}">
       <button class="n" data-v="n" aria-pressed="${s==="n"}">Normal</button>
       <button class="a" data-v="a" aria-pressed="${s==="a"}">Abnormal</button>
-    </div></div>`;
+    </div>${s==="a"?`<div class="ed"><label for="ed-${key.replace(/[^a-z0-9]/gi,"_")}">Findings</label><textarea id="ed-${key.replace(/[^a-z0-9]/gi,"_")}" data-key="${key}">${esc(abnText(key,it[0]))}</textarea>
+      <label for="im-${key.replace(/[^a-z0-9]/gi,"_")}">Impression line</label><input type="text" class="imp" id="im-${key.replace(/[^a-z0-9]/gi,"_")}" data-key="${key}" value="${esc(impText(key,it[0]))}" placeholder="Leave blank to keep this out of the impression">
+      <div class="row"><button class="btn ghost ed-save" data-key="${key}">Save as my default</button><button class="btn ghost ed-reset" data-key="${key}">Reset</button><span>[a / b] choose one · __ fill in</span></div></div>`:""}</div>`;
 }
 function sectionHTML(title,meta,list,prefix,cls=""){
   return `<section class="section ${cls}"><header><h2>${title}</h2><span class="meta">${meta}</span></header>
@@ -395,7 +547,7 @@ function setMark(k,v,noHist){
   if(!noHist) hist.push([[k,marks[k]]]);
   if(v) marks[k]=v; else delete marks[k];
   const row=document.querySelector(`.item[data-key="${k}"]`);
-  if(row){row.dataset.s=v||""; row.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed", x.dataset.v===v));}
+  if(row){ const wasCur=row.classList.contains("cur"); row.outerHTML=itemHTML(k,itemOf(k)); }
   updCursor(); renderReport(); save();
 }
 function updCursor(){
@@ -416,9 +568,37 @@ function undo(){
   renderRead(); renderReport(); save();
 }
 $("#allnorm").onclick=restNormal;
+$("#pane-read").addEventListener("input",e=>{
+  const t=e.target.closest(".ed textarea"), im=e.target.closest(".ed input.imp");
+  if(t){ const k=t.dataset.key; caseTx[k]=t.value;
+    if(caseImp[k]===undefined){ const box=document.querySelector(`.ed input.imp[data-key="${k}"]`); if(box) box.value=impText(k,itemOf(k)[0]); } }
+  if(im){ caseImp[im.dataset.key]=im.value; }
+  if(t||im){ renderReport(); save(); }
+});
+$("#pane-read").addEventListener("click",e=>{
+  const sv=e.target.closest(".ed-save"), rs=e.target.closest(".ed-reset");
+  if(sv){ const k=sv.dataset.key, it=itemOf(k); const t=document.querySelector(`.ed textarea[data-key="${k}"]`);
+    const ib=document.querySelector(`.ed input.imp[data-key="${k}"]`);
+    myPh[phKey(k,it[0])]=t.value; myPh[phKey(k,it[0])+"#imp"]=ib.value; delete caseTx[k]; delete caseImp[k]; save(); renderMine(); flash(sv,"Saved"); track("save-phrase"); }
+  if(rs){ const k=rs.dataset.key, it=itemOf(k); delete caseTx[k]; delete caseImp[k]; const t=document.querySelector(`.ed textarea[data-key="${k}"]`); t.value=defaultAbn(k,it[0]);
+    const ib=document.querySelector(`.ed input.imp[data-key="${k}"]`); ib.value=impText(k,it[0]); renderReport(); save(); }
+});
+function flash(btn,msg){const o=btn.textContent; btn.textContent=msg; setTimeout(()=>btn.textContent=o,1400);}
+function renderMine(){
+  const n=Object.keys(myPh).filter(k=>!k.endsWith("#imp")).length;
+  $("#mine").innerHTML=`<details class="mine"><summary>My saved descriptions (${n})</summary>
+    <p>Saved in this browser only. Copy them to keep a backup or to move them to another computer, then paste and import there.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="mine-copy">Copy my descriptions</button><button class="btn ghost" id="mine-imp">Import pasted text</button>${n?'<button class="btn ghost" id="mine-clear">Remove all</button>':''}</div>
+    <textarea id="mine-box" placeholder="Paste copied descriptions here, then press Import"></textarea><div id="mine-msg" aria-live="polite"></div></details>`;
+}
+$("#mine").addEventListener("click",async e=>{
+  if(e.target.id==="mine-copy"){ const t=JSON.stringify(myPh,null,1); try{await navigator.clipboard.writeText(t); $("#mine-msg").textContent="Copied.";}catch(err){ $("#mine-box").value=t; $("#mine-box").select(); $("#mine-msg").textContent="Selected below. Press Ctrl+C."; } }
+  if(e.target.id==="mine-imp"){ try{ const o=JSON.parse($("#mine-box").value); let c=0; for(const [k,v] of Object.entries(o)) if(typeof v==="string"){myPh[k]=v;c++;} save(); renderMine(); $("#mine-msg").textContent=c+" descriptions imported."; renderRead(); renderReport(); }catch(err){ $("#mine-msg").textContent="That text isn't a valid copy of saved descriptions. Copy it again and paste the whole thing."; } }
+  if(e.target.id==="mine-clear"){ for(const k in myPh) delete myPh[k]; save(); renderMine(); renderRead(); renderReport(); }
+});
 document.addEventListener("keydown",e=>{
   if(e.ctrlKey||e.metaKey||e.altKey) return;
-  if(e.target.closest("input,select,textarea")) return;
+  if(e.target.closest && e.target.closest("input,select,textarea")) return;
   if($("#read-wrap").hidden && "nxau".includes(e.key.toLowerCase())) return;
   const k=e.key.toLowerCase();
   if(k==="n"||k==="x"){const c=document.querySelector("#pane-read .item.cur"); if(c){setMark(c.dataset.key, k==="n"?"n":"a"); const n=document.querySelector("#pane-read .item.cur"); if(n) n.scrollIntoView({block:"nearest"});} e.preventDefault();}
@@ -605,6 +785,14 @@ $("#sp-uk").onclick=()=>{opt.us=false; syncOpts(); renderReport(); save();};
 $("#sp-us").onclick=()=>{opt.us=true; syncOpts(); renderReport(); save();};
 
 // ---------- Report ----------
+function impression(abn,g){
+  const out=[]; const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
+  abn.forEach(x=>{ if(x.imp && x.imp.trim()) out.push(x.imp.trim()); });
+  g.forEach(t=>{ let m=t.match(/^(.*?):.*?(AAST \(2018\) grade [IV]+)/); if(m){out.push(m[1]+", "+m[2]+"."); return;}
+    m=t.match(/^Features of (acute [^.]*?pancreatitis)/); if(m){out.push(cap(m[1])+"."); return;}
+    m=t.match(/^(.*?small bowel obstruction)/); if(m) out.push(m[1]+(/Features of a closed-loop/.test(t)?", closed-loop":"")+(/concerning for ischaemia/.test(t)?", with features concerning for ischaemia":"")+"."); });
+  return [...new Set(out)];
+}
 function renderReport(){
   const d=IND[cur];
   const groups=[[d.items,cur+":i"],[d.dm,cur+":d"],[SWEEP,"sw:"]];
@@ -612,7 +800,7 @@ function renderReport(){
   groups.forEach(([list,p],gi)=>list.forEach((it,i)=>{
     const s=marks[p+i];
     if(s==="n"){n++; if(it[2]){ if(opt.short && gi>0) otherNormal++; else neg.push(it[2]); }}
-    else if(s==="a"){a++; abn.push(it[0]);}
+    else if(s==="a"){a++; abn.push({t:abnText(p+i,it[0]), imp:impText(p+i,it[0])});}
     else o++;
   }));
   $("#cN").textContent=n+" normal"; $("#cA").textContent=a+" abnl"; $("#cO").textContent=o+" open";
@@ -621,31 +809,36 @@ function renderReport(){
   L.push("FINDINGS:");
   const g=Object.values(grades);
   if(!abn.length && !g.length && !neg.length) L.push("Mark checklist items or add a grade to build this section.");
-  abn.forEach(x=>L.push("[Describe — "+x+"]"));
+  abn.forEach(x=>L.push(x.t));
   g.forEach(x=>L.push(x));
   if(otherNormal) neg.push("No other acute abdominal or pelvic abnormality.");
   if(neg.length){ if(abn.length||g.length) L.push(""); L.push(neg.join(" ")); }
   L.push("","IMPRESSION:");
-  if(g.length||abn.length) L.push("1. [Primary finding]"); else if(neg.length) L.push("No acute abnormality on the reviewed checklist.");
+  const imp=impression(abn,g);
+  if(imp.length) imp.forEach((x,i)=>L.push((i+1)+". "+x));
+  else if(g.length||abn.length) L.push("1. [Primary finding]"); else if(neg.length) L.push("No acute abnormality on the reviewed checklist.");
   else L.push("—");
-  if(o) L.push("","— "+o+" checklist item"+(o>1?"s":"")+" not yet reviewed —");
-  $("#rep").textContent=spell(L.join("\n"));
+  $("#openmsg").textContent = o ? o+" checklist item"+(o>1?"s":"")+" not yet reviewed" : "All checklist items reviewed";
+  $("#openmsg").dataset.open = o ? "1" : "0";
+  if(!manual) $("#rep").value=spell(L.join("\n"));
 }
 $("#copy").onclick=async()=>{
-  const txt=$("#rep").textContent.replace(/\n\n— \d+ checklist items? not yet reviewed —$/,"");
+  const txt=$("#rep").value.replace(/\n\n— \d+ checklist items? not yet reviewed —$/,"");
   track("copy-report");
   try{await navigator.clipboard.writeText(txt); $("#toast").textContent="Copied";}
-  catch(e){const r=document.createRange(); r.selectNodeContents($("#rep")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); $("#toast").textContent="Selected. Press Ctrl+C";}
+  catch(e){$("#rep").select(); $("#toast").textContent="Selected. Press Ctrl+C";}
   setTimeout(()=>$("#toast").textContent="",2200);
 };
-$("#reset").onclick=()=>{hist.length=0;Object.keys(marks).forEach(k=>delete marks[k]); Object.keys(grades).forEach(k=>delete grades[k]); renderRead(); renderGrade(); renderReport(); save();};
+$("#rep").addEventListener("input",()=>{ if(!manual){ manual=true; $("#manual").hidden=false; } });
+$("#rebuild").onclick=()=>{ manual=false; $("#manual").hidden=true; renderReport(); };
+$("#reset").onclick=()=>{manual=false; $("#manual").hidden=true; for(const k in caseImp) delete caseImp[k];hist.length=0; for(const k in caseTx) delete caseTx[k];Object.keys(marks).forEach(k=>delete marks[k]); Object.keys(grades).forEach(k=>delete grades[k]); renderRead(); renderGrade(); renderReport(); save();};
 
 // ---------- Boot with an example state ----------
 if(!saved){
   // Example: abdominal pain case partly worked
   marks["pain:i0"]="n"; marks["pain:i1"]="n"; marks["pain:i5"]="a"; marks["pain:d1"]="n"; marks["sw:0"]="n"; marks["sw:1"]="n";
 }
-syncOpts(); renderRail(); renderRead(); renderGrade(); renderReport();
+renderMine(); syncOpts(); renderRail(); renderRead(); renderGrade(); renderReport();
 </script>
 <script data-goatcounter="https://eracompanion.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body></html>
