@@ -4,7 +4,7 @@ An indication-based reading checklist and reporting aid for emergency abdominal 
 
 The radiologist selects the clinical question (for example RLQ pain, renal colic or blunt trauma). The tool then shows a tailored review checklist, a list of commonly missed diagnoses for that indication, and an every-scan sweep. Items marked normal become pertinent-negative sentences; items marked abnormal become prompts in a draft report. A grading module covers AAST 2018 liver, spleen and kidney injury, the modified CT severity index with revised Atlanta collection terms, and CT signs of closed-loop obstruction and ischaemia in small bowel obstruction.
 
-**Live version:** add your GitHub Pages link here once published.
+**Live version:** https://ashnad235.github.io/ER-Abdomen-Companion/
 
 ## Author
 
@@ -16,13 +16,15 @@ Clinical content and design by the author. Built with AI assistance (Claude, Ant
 
 ## How to cite
 
-Nadaf A. ER Abdomen Companion: an indication-based reading checklist and reporting aid for emergency abdominal CT [web application]. Version 1.0. 2026.
+Nadaf A. ER Abdomen Companion: an indication-based reading checklist and reporting aid for emergency abdominal CT [web application]. Version 1.0. 2026. Available from: https://ashnad235.github.io/ER-Abdomen-Companion/
 
 GitHub also shows a "Cite this repository" button generated from `CITATION.cff`.
 
 ## Data and privacy
 
-The tool runs entirely in the browser. It does not ask for or store patient identifiers, and it sends no data anywhere. Checklist marks are saved only in the user's own browser.
+The tool runs entirely in the browser. It does not ask for or store patient identifiers, and no checklist content or report text ever leaves the browser. Checklist marks are saved only in the user's own browser.
+
+The public site counts visits and a few anonymous actions (indication chosen, grade added, report copied) with [GoatCounter](https://www.goatcounter.com/), which uses no cookies and does not identify visitors.
 
 ## Scope and limitations
 

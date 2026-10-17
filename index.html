@@ -1,4 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ER Abdomen Companion</title>
+<meta name="description" content="Indication-based reading checklist and reporting aid for emergency abdominal CT, with AAST injury grading, pancreatitis and SBO tools. By Dr Ashraf Nadaf.">
+<meta name="author" content="Ashraf Nadaf">
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 /* Layout: reading-room console. Indication rail on top, checklist + grading left, live report pinned right. */
@@ -148,19 +150,19 @@ aside.report footer{display:flex;gap:8px;padding:12px 16px;border-top:1px solid 
   <footer class="credits">
     <div>
       <div class="label">Author</div>
-      <div><b id="cr-name"></b>, MD, DNB, EDiR, FRCR<br>Specialist Radiologist, Abu Dhabi, UAE<br>ORCID <a href="https://orcid.org/0000-0003-1838-325X">0000-0003-1838-325X</a></div>
-      <div style="margin-top:8px">Version <span id="cr-ver"></span> · <span id="cr-date"></span>. Clinical content and design by the author; built with AI assistance (Claude, Anthropic).</div>
+      <div><b id="cr-name">Dr Ashraf Nadaf</b>, MD, DNB, EDiR, FRCR<br>Specialist Radiologist, Abu Dhabi, UAE<br>ORCID <a href="https://orcid.org/0000-0003-1838-325X">0000-0003-1838-325X</a></div>
+      <div style="margin-top:8px">Version <span id="cr-ver">1.0</span> · <span id="cr-date">October 2026</span>. Clinical content and design by the author; built with AI assistance (Claude, Anthropic).</div>
     </div>
     <div>
       <div class="label">How to cite</div>
-      <div class="cite" id="cr-cite"></div>
+      <div class="cite" id="cr-cite">Nadaf A. ER Abdomen Companion: an indication-based reading checklist and reporting aid for emergency abdominal CT [web application]. Version 1.0. 2026. Available from: https://ashnad235.github.io/ER-Abdomen-Companion/</div><div style="margin-top:6px"><a href="https://github.com/ashnad235/ER-Abdomen-Companion">Source and citation file on GitHub</a></div>
     </div>
   </footer>
 </div>
 
 <script>
 // ---------- Credits (edit here) ----------
-const CREDITS = {name:"Ashraf Nadaf", citeName:"Nadaf A", version:"1.0", date:"October 2026", year:"2026", url:""};
+const CREDITS = {name:"Ashraf Nadaf", citeName:"Nadaf A", version:"1.0", date:"October 2026", year:"2026", url:"https://ashnad235.github.io/ER-Abdomen-Companion/"};
 document.getElementById("cr-name").textContent = "Dr " + CREDITS.name;
 document.getElementById("cr-ver").textContent = CREDITS.version;
 document.getElementById("cr-date").textContent = CREDITS.date;
@@ -326,6 +328,8 @@ const saved = store.get(); if(saved){cur = saved.cur||cur; Object.assign(marks,s
 const save = ()=>store.set({cur,marks,grades});
 
 const $ = s=>document.querySelector(s);
+// Anonymous usage counts (GoatCounter on the public site; does nothing elsewhere)
+const track = name=>{try{ if(window.goatcounter && window.goatcounter.count) window.goatcounter.count({path:"event/"+name, title:name, event:true}); }catch(e){}};
 const esc = s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 // ---------- Rail ----------
@@ -335,7 +339,7 @@ function renderRail(){
 }
 $("#rail").addEventListener("click",e=>{
   const b=e.target.closest(".chip"); if(!b) return;
-  cur=b.dataset.k; renderRail(); renderRead(); renderReport(); save();
+  cur=b.dataset.k; renderRail(); renderRead(); renderReport(); save(); track("indication-"+cur);
 });
 
 // ---------- Checklist ----------
@@ -520,7 +524,7 @@ $("#pane-grade").addEventListener("change",e=>{if(e.target.closest("#gf")) updGr
 $("#pane-grade").addEventListener("input",e=>{if(e.target.id==="sb_loc") updGrade()});
 $("#pane-grade").addEventListener("click",e=>{
   const m=e.target.closest("[data-m]"); if(m){curMod=m.dataset.m; renderGrade(); return;}
-  if(e.target.id==="addg"){const t=$("#go").dataset.text; if(t){grades[curMod]=t; updGrade(); renderReport(); save();}}
+  if(e.target.id==="addg"){const t=$("#go").dataset.text; if(t){grades[curMod]=t; updGrade(); renderReport(); save(); track("grade-"+curMod);}}
   if(e.target.id==="remg"){delete grades[curMod]; updGrade(); renderReport(); save();}
 });
 
@@ -560,6 +564,7 @@ function renderReport(){
 }
 $("#copy").onclick=async()=>{
   const txt=$("#rep").textContent.replace(/\n\n— \d+ checklist items? not yet reviewed —$/,"");
+  track("copy-report");
   try{await navigator.clipboard.writeText(txt); $("#toast").textContent="Copied";}
   catch(e){const r=document.createRange(); r.selectNodeContents($("#rep")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); $("#toast").textContent="Selected. Press Ctrl+C";}
   setTimeout(()=>$("#toast").textContent="",2200);
@@ -573,4 +578,5 @@ if(!saved){
 }
 renderRail(); renderRead(); renderGrade(); renderReport();
 </script>
+<script data-goatcounter="https://eracompanion.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body></html>
