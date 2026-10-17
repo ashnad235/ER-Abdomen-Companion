@@ -362,7 +362,8 @@ const ABN = {
   "Bones":"[Fracture / lytic lesion / sclerotic lesion] of the __.",
   "Free fluid":"[Small / moderate / large] volume of [simple / high-attenuation] free fluid in the __.",
 
-  "Appendix":"Dilated appendix measuring __ mm with wall hyperenhancement and periappendiceal fat stranding[, and an appendicolith at its base], in keeping with acute appendicitis.",
+  "Appendix":"The appendix is retrocecal/ preileal/ post-ileal/ pelvic/ paracecal and dilated, measuring __ mm in maximum diameter, with thickened, enhancing walls and hypodense pus in the lumen. An impacted appendicolith is seen at the base, measuring __ mm. Periappendiceal fat stranding and adhesions are seen without periappendiceal collection, mass formation, perforation, or pneumoperitoneum.",
+  "Appendix#imp":"Features suggestive of Acute appendicitis. No obvious mass formation or perforation. Suggested urgent surgical referral.",
   "Appendiceal perforation":"Features of appendiceal perforation: [focal wall defect / extraluminal gas / extraluminal appendicolith / periappendiceal abscess measuring __ cm].",
   "Gallbladder and biliary tree":"Distended gallbladder with wall thickening of __ mm and pericholecystic fat stranding[, and gallstones], in keeping with acute cholecystitis.",
   "Pancreas":"Pancreatic enlargement with peripancreatic fat stranding[ and fluid], in keeping with acute pancreatitis.",
@@ -513,7 +514,7 @@ function defaultAbn(key,title){ const k=phKey(key,title); return myPh[k] ?? ABN[
 function abnText(key,title){ return caseTx[key] ?? defaultAbn(key,title); }
 const cap1=t=>t.charAt(0).toUpperCase()+t.slice(1);
 function deriveImp(text){ const m=text.match(/(?:in keeping with|concerning for|suspicious for|suggestive of)\s+([^.;]+)/i); return m?cap1(m[1].trim())+".":""; }
-function impText(key,title){ if(caseImp[key]!==undefined) return caseImp[key]; const k=phKey(key,title)+"#imp"; return myPh[k] ?? deriveImp(abnText(key,title)); }
+function impText(key,title){ if(caseImp[key]!==undefined) return caseImp[key]; const k=phKey(key,title)+"#imp"; if(myPh[k]!==undefined) return myPh[k]; if(ABN[k]!==undefined) return ABN[k]; return deriveImp(abnText(key,title)); }
 function itemHTML(key,it){
   const s=marks[key]||"";
   return `<div class="item" data-key="${key}" data-s="${s}">
