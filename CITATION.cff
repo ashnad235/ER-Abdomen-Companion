@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use or adapt this tool, please cite it as below."
+title: "ER Abdomen Companion: an indication-based reading checklist and reporting aid for emergency abdominal CT"
+type: software
+version: "1.0"
+date-released: "2026-10-17"
+authors:
+  - family-names: "Nadaf"
+    given-names: "Ashraf"
+    orcid: "https://orcid.org/0000-0003-1838-325X"
+license: CC-BY-NC-4.0
+keywords:
+  - emergency radiology
+  - abdominal CT
+  - structured reporting
+  - AAST injury grading
+  - radiology education
