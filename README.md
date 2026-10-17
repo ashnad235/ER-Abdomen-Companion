@@ -16,7 +16,7 @@ Clinical content and design by the author. Built with AI assistance (Claude, Ant
 
 ## How to cite
 
-Nadaf A. ER Abdomen Companion: an indication-based reading checklist and reporting aid for emergency abdominal CT [web application]. Version 1.0. 2026. Available from: https://ashnad235.github.io/ER-Abdomen-Companion/
+Nadaf A. ER Abdomen Companion: an indication-based reading checklist and reporting aid for emergency abdominal CT [web application]. Version 1.1. 2026. Available from: https://ashnad235.github.io/ER-Abdomen-Companion/
 
 GitHub also shows a "Cite this repository" button generated from `CITATION.cff`.
 
@@ -40,6 +40,7 @@ This is an educational and reporting aid, not a diagnostic device. Grading crite
 
 ## Changelog
 
+- **1.1 (October 2026):** speed mode (keyboard shortcuts N, X, A, U, C and a "Mark remaining normal" button), concise report option, US spelling option.
 - **1.0 (October 2026):** first release. Eleven indications, every-scan sweep, AAST liver/spleen/kidney, pancreatitis mCTSI + Atlanta, SBO risk signs, report draft with copy.
 
 ## Licence

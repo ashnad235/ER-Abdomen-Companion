@@ -100,6 +100,13 @@ aside.report h2{font-size:18px}
 pre.rep{margin:0;padding:14px 16px;font-family:var(--f-mono);font-size:12.5px;line-height:1.6;white-space:pre-wrap;word-wrap:break-word;overflow:auto;flex:1;min-height:200px}
 aside.report footer{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line);flex-wrap:wrap;align-items:center}
 .toast{font-size:13px;color:var(--ok)}
+.opts{display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--line);align-items:center;font-size:12.5px;color:var(--muted)}
+.opts .seg button{padding:4px 9px;font-size:12.5px}
+.opts .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.speed{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.keys{font-size:12.5px;color:var(--muted)}
+kbd{font-family:var(--f-mono);font-size:11.5px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--panel);color:var(--fg)}
+.item.cur{outline:2px solid var(--accent);outline-offset:-2px}
 .note{font-size:12.5px;color:var(--muted);max-width:75ch;margin-top:8px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 .credits{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 28px;font-size:13px;color:var(--muted)}
@@ -129,7 +136,13 @@ aside.report footer{display:flex;gap:8px;padding:12px 16px;border-top:1px solid 
         <button class="tab" role="tab" id="tab-read" aria-selected="true">Checklist</button>
         <button class="tab" role="tab" id="tab-grade" aria-selected="false">Grade &amp; classify</button>
       </div>
-      <div id="pane-read" style="display:flex;flex-direction:column;gap:20px"></div>
+      <div id="read-wrap" style="display:flex;flex-direction:column;gap:12px">
+        <div class="speed">
+          <span class="keys"><kbd>N</kbd> normal · <kbd>X</kbd> abnormal · <kbd>A</kbd> rest normal · <kbd>U</kbd> undo · <kbd>C</kbd> copy</span>
+          <button class="btn ghost" id="allnorm">Mark remaining normal</button>
+        </div>
+        <div id="pane-read" style="display:flex;flex-direction:column;gap:20px"></div>
+      </div>
       <div id="pane-grade" hidden></div>
       <p class="note">Educational and reporting aid. Criteria are summarised from AAST OIS 2018, revised Atlanta 2012 and the modified CT severity index; check them against the source papers before relying on this. Not for diagnosis.</p>
     </div>
@@ -139,6 +152,12 @@ aside.report footer{display:flex;gap:8px;padding:12px 16px;border-top:1px solid 
         <h2>Report draft</h2>
         <div class="counts"><span class="c-n" id="cN">0 normal</span><span class="c-a" id="cA">0 abnl</span><span class="c-o" id="cO">0 open</span></div>
       </header>
+      <div class="opts">
+        <span>Report</span>
+        <div class="seg" role="group" aria-label="Report length"><button id="len-full" aria-pressed="true">Full</button><button id="len-short" aria-pressed="false">Concise</button></div>
+        <span>Spelling</span>
+        <div class="seg" role="group" aria-label="Spelling"><button id="sp-uk" aria-pressed="true">UK</button><button id="sp-us" aria-pressed="false">US</button></div>
+      </div>
       <pre class="rep" id="rep"></pre>
       <footer>
         <button class="btn" id="copy">Copy text</button>
@@ -151,18 +170,18 @@ aside.report footer{display:flex;gap:8px;padding:12px 16px;border-top:1px solid 
     <div>
       <div class="label">Author</div>
       <div><b id="cr-name">Dr Ashraf Nadaf</b>, MD, DNB, EDiR, FRCR<br>Specialist Radiologist, Abu Dhabi, UAE<br>ORCID <a href="https://orcid.org/0000-0003-1838-325X">0000-0003-1838-325X</a></div>
-      <div style="margin-top:8px">Version <span id="cr-ver">1.0</span> · <span id="cr-date">October 2026</span>. Clinical content and design by the author; built with AI assistance (Claude, Anthropic).</div>
+      <div style="margin-top:8px">Version <span id="cr-ver">1.1</span> · <span id="cr-date">October 2026</span>. Clinical content and design by the author; built with AI assistance (Claude, Anthropic).</div>
     </div>
     <div>
       <div class="label">How to cite</div>
-      <div class="cite" id="cr-cite">Nadaf A. ER Abdomen Companion: an indication-based reading checklist and reporting aid for emergency abdominal CT [web application]. Version 1.0. 2026. Available from: https://ashnad235.github.io/ER-Abdomen-Companion/</div><div style="margin-top:6px"><a href="https://github.com/ashnad235/ER-Abdomen-Companion">Source and citation file on GitHub</a></div>
+      <div class="cite" id="cr-cite">Nadaf A. ER Abdomen Companion: an indication-based reading checklist and reporting aid for emergency abdominal CT [web application]. Version 1.1. 2026. Available from: https://ashnad235.github.io/ER-Abdomen-Companion/</div><div style="margin-top:6px"><a href="https://github.com/ashnad235/ER-Abdomen-Companion">Source and citation file on GitHub</a></div>
     </div>
   </footer>
 </div>
 
 <script>
 // ---------- Credits (edit here) ----------
-const CREDITS = {name:"Ashraf Nadaf", citeName:"Nadaf A", version:"1.0", date:"October 2026", year:"2026", url:"https://ashnad235.github.io/ER-Abdomen-Companion/"};
+const CREDITS = {name:"Ashraf Nadaf", citeName:"Nadaf A", version:"1.1", date:"October 2026", year:"2026", url:"https://ashnad235.github.io/ER-Abdomen-Companion/"};
 document.getElementById("cr-name").textContent = "Dr " + CREDITS.name;
 document.getElementById("cr-ver").textContent = CREDITS.version;
 document.getElementById("cr-date").textContent = CREDITS.date;
@@ -325,7 +344,9 @@ const store = {
   set(v){try{localStorage.setItem("erac",JSON.stringify(v))}catch(e){}}
 };
 const saved = store.get(); if(saved){cur = saved.cur||cur; Object.assign(marks,saved.marks||{}); Object.assign(grades,saved.grades||{});}
-const save = ()=>store.set({cur,marks,grades});
+let opt = Object.assign({short:false, us:false}, (saved&&saved.opt)||{});
+const hist = [];
+const save = ()=>store.set({cur,marks,grades,opt});
 
 const $ = s=>document.querySelector(s);
 // Anonymous usage counts (GoatCounter on the public site; does nothing elsewhere)
@@ -362,14 +383,48 @@ function renderRead(){
     sectionHTML(esc(d.name)+": primary review", `${d.items.length} checks`, d.items, cur+":i")+
     sectionHTML("Don’t miss", "Commonly missed on this indication", d.dm, cur+":d","dm")+
     sectionHTML("Every scan", "Check regardless of indication", SWEEP, "sw:");
+  updCursor();
 }
 $("#pane-read").addEventListener("click",e=>{
   const b=e.target.closest(".seg button"); if(!b) return;
   const row=b.closest(".item"), k=row.dataset.key, v=b.dataset.v;
-  marks[k] = marks[k]===v ? undefined : v; if(!marks[k]) delete marks[k];
-  row.dataset.s = marks[k]||"";
-  row.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed", x.dataset.v===marks[k]));
-  renderReport(); save();
+  setMark(k, marks[k]===v ? undefined : v);
+});
+
+function setMark(k,v,noHist){
+  if(!noHist) hist.push([[k,marks[k]]]);
+  if(v) marks[k]=v; else delete marks[k];
+  const row=document.querySelector(`.item[data-key="${k}"]`);
+  if(row){row.dataset.s=v||""; row.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed", x.dataset.v===v));}
+  updCursor(); renderReport(); save();
+}
+function updCursor(){
+  document.querySelectorAll(".item.cur").forEach(e=>e.classList.remove("cur"));
+  const c=document.querySelector('#pane-read .item[data-s=""]'); if(c) c.classList.add("cur");
+  return c;
+}
+function restNormal(){
+  const open=[...document.querySelectorAll('#pane-read .item[data-s=""]')];
+  if(!open.length) return;
+  hist.push(open.map(r=>[r.dataset.key,undefined]));
+  open.forEach(r=>{marks[r.dataset.key]="n"; r.dataset.s="n"; r.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed", x.dataset.v==="n"));});
+  updCursor(); renderReport(); save(); track("rest-normal");
+}
+function undo(){
+  const step=hist.pop(); if(!step) return;
+  step.forEach(([k,v])=>{ if(v) marks[k]=v; else delete marks[k]; });
+  renderRead(); renderReport(); save();
+}
+$("#allnorm").onclick=restNormal;
+document.addEventListener("keydown",e=>{
+  if(e.ctrlKey||e.metaKey||e.altKey) return;
+  if(e.target.closest("input,select,textarea")) return;
+  if($("#read-wrap").hidden && "nxau".includes(e.key.toLowerCase())) return;
+  const k=e.key.toLowerCase();
+  if(k==="n"||k==="x"){const c=document.querySelector("#pane-read .item.cur"); if(c){setMark(c.dataset.key, k==="n"?"n":"a"); const n=document.querySelector("#pane-read .item.cur"); if(n) n.scrollIntoView({block:"nearest"});} e.preventDefault();}
+  else if(k==="a"){restNormal(); e.preventDefault();}
+  else if(k==="u"){undo(); e.preventDefault();}
+  else if(k==="c"){$("#copy").click(); e.preventDefault();}
 });
 
 // ---------- Grading ----------
@@ -531,19 +586,32 @@ $("#pane-grade").addEventListener("click",e=>{
 // ---------- Tabs ----------
 function showTab(which){
   $("#tab-read").setAttribute("aria-selected",which==="read"); $("#tab-grade").setAttribute("aria-selected",which==="grade");
-  $("#pane-read").hidden = which!=="read"; $("#pane-grade").hidden = which!=="grade";
+  $("#read-wrap").hidden = which!=="read"; $("#pane-grade").hidden = which!=="grade";
 }
 $("#tab-read").onclick=()=>showTab("read");
 $("#tab-grade").onclick=()=>showTab("grade");
+
+// ---------- Report options ----------
+const US=[[/visualised/g,"visualized"],[/devascularis/g,"devasculariz"],[/localised/g,"localized"],[/summarised/g,"summarized"],
+  [/calibre/g,"caliber"],[/tumour/g,"tumor"],[/oedem/g,"edem"],[/Oedem/g,"Edem"],[/aem/g,"em"],[/Haem/g,"Hem"],[/caec/g,"cec"],[/Caec/g,"Cec"],[/faec/g,"fec"]];
+const spell=t=>opt.us?US.reduce((s,[a,b])=>s.replace(a,b),t):t;
+function syncOpts(){
+  $("#len-full").setAttribute("aria-pressed",!opt.short); $("#len-short").setAttribute("aria-pressed",opt.short);
+  $("#sp-uk").setAttribute("aria-pressed",!opt.us); $("#sp-us").setAttribute("aria-pressed",opt.us);
+}
+$("#len-full").onclick=()=>{opt.short=false; syncOpts(); renderReport(); save();};
+$("#len-short").onclick=()=>{opt.short=true; syncOpts(); renderReport(); save();};
+$("#sp-uk").onclick=()=>{opt.us=false; syncOpts(); renderReport(); save();};
+$("#sp-us").onclick=()=>{opt.us=true; syncOpts(); renderReport(); save();};
 
 // ---------- Report ----------
 function renderReport(){
   const d=IND[cur];
   const groups=[[d.items,cur+":i"],[d.dm,cur+":d"],[SWEEP,"sw:"]];
-  let n=0,a=0,o=0; const abn=[], neg=[];
-  groups.forEach(([list,p])=>list.forEach((it,i)=>{
+  let n=0,a=0,o=0; const abn=[], neg=[]; let otherNormal=0;
+  groups.forEach(([list,p],gi)=>list.forEach((it,i)=>{
     const s=marks[p+i];
-    if(s==="n"){n++; if(it[2]) neg.push(it[2]);}
+    if(s==="n"){n++; if(it[2]){ if(opt.short && gi>0) otherNormal++; else neg.push(it[2]); }}
     else if(s==="a"){a++; abn.push(it[0]);}
     else o++;
   }));
@@ -555,12 +623,13 @@ function renderReport(){
   if(!abn.length && !g.length && !neg.length) L.push("Mark checklist items or add a grade to build this section.");
   abn.forEach(x=>L.push("[Describe — "+x+"]"));
   g.forEach(x=>L.push(x));
+  if(otherNormal) neg.push("No other acute abdominal or pelvic abnormality.");
   if(neg.length){ if(abn.length||g.length) L.push(""); L.push(neg.join(" ")); }
   L.push("","IMPRESSION:");
   if(g.length||abn.length) L.push("1. [Primary finding]"); else if(neg.length) L.push("No acute abnormality on the reviewed checklist.");
   else L.push("—");
   if(o) L.push("","— "+o+" checklist item"+(o>1?"s":"")+" not yet reviewed —");
-  $("#rep").textContent=L.join("\n");
+  $("#rep").textContent=spell(L.join("\n"));
 }
 $("#copy").onclick=async()=>{
   const txt=$("#rep").textContent.replace(/\n\n— \d+ checklist items? not yet reviewed —$/,"");
@@ -569,14 +638,14 @@ $("#copy").onclick=async()=>{
   catch(e){const r=document.createRange(); r.selectNodeContents($("#rep")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); $("#toast").textContent="Selected. Press Ctrl+C";}
   setTimeout(()=>$("#toast").textContent="",2200);
 };
-$("#reset").onclick=()=>{Object.keys(marks).forEach(k=>delete marks[k]); Object.keys(grades).forEach(k=>delete grades[k]); renderRead(); renderGrade(); renderReport(); save();};
+$("#reset").onclick=()=>{hist.length=0;Object.keys(marks).forEach(k=>delete marks[k]); Object.keys(grades).forEach(k=>delete grades[k]); renderRead(); renderGrade(); renderReport(); save();};
 
 // ---------- Boot with an example state ----------
 if(!saved){
   // Example: abdominal pain case partly worked
   marks["pain:i0"]="n"; marks["pain:i1"]="n"; marks["pain:i5"]="a"; marks["pain:d1"]="n"; marks["sw:0"]="n"; marks["sw:1"]="n";
 }
-renderRail(); renderRead(); renderGrade(); renderReport();
+syncOpts(); renderRail(); renderRead(); renderGrade(); renderReport();
 </script>
 <script data-goatcounter="https://eracompanion.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body></html>
